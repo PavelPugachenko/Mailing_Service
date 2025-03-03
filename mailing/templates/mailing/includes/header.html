@@ -1,0 +1,65 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand text-primary" href="{% url 'mailing:home' %}">Mailing Service</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
+                aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'mailing:home' %}">Home</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Lookup
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'mailing:mail-receivers-list' %}">Mail Receivers</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mailing:mailing-units-list' %}">Mailings</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mailing:messages-list' %}">Messages</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mailing:all-mailing-attempts-list' %}">Mailing History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Add
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'mailing:mail-receiver-create' %}">Mail Receiver</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mailing:mailing-unit-create' %}">Mailing</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mailing:message-create' %}">Message</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page"
+                       href="{% url 'users:user-profile' user.pk %}">Profile</a>
+                </li>
+                <li class="nav-item">
+                    {% if perms.users.view_customuser %}
+                    <a class="nav-link active text-light bg-dark me-2" aria-current="page"
+                       href="{% url 'users:all-users' %}">See all users</a>
+                    {% endif %}
+                </li>
+                <li class="nav-item">
+                    {% if perms.mailing.can_view_report %}
+                    <a class="nav-link active text-light bg-dark me-2" aria-current="page"
+                       href="{% url 'mailing:report' %}">See report</a>
+                    {% endif %}
+                </li>
+                {% endif %}
+            </ul>
+            {% if user.is_authenticated %}
+
+            <form method="post" action="{% url 'users:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="p-2 btn btn-outline-danger">Logout</button>
+            </form>
+            {% endif %}
+
+        </div>
+    </div>
+</nav>

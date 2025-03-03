@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Mailing{% endblock %}
+
+{% block content %}
+
+<div class="card mb-4 box-shadow">
+    <div class="card-header">
+        {% if mailing_unit %}
+        <h4 class="my-0 font-weight-normal">Edit Mailing</h4>
+        {% else %}
+        <h4 class="my-0 font-weight-normal">Add mailing</h4>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="post" action="" class="form-floating" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.message.label_tag }}
+                {{ form.message }}
+            </div>
+            <div class="mb-3">
+                {{ form.receivers.label_tag }}
+                {% for checkbox in form.receivers %}
+                <div class="form-check">
+                    {{ checkbox.tag }}
+                    <label class="form-check-label">{{ checkbox.choice_label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Save mailing</button>
+            <a href="{% url 'mailing:mailing-units-list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

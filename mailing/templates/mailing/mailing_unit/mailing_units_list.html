@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %} All mailings {% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if mailing_units|length == 0 %}
+<h4>No mailings created</h4>
+{% endif %}
+<ul class="list-group list-group-flush">
+    {% for mailing_unit in mailing_units %}
+    {% if mailing_unit.owner == user or perms.mailing.view_mailingunit%}
+    <li class="list-group-item">
+        <h4>Title: <span class="badge text-bg-secondary">{{ mailing_unit.message }}</span></h4>
+        {% if mailing_unit.status == 'Launched' %}
+        <h6>Status: <span class="badge text-bg-success">{{ mailing_unit.status }}</span></h6>
+        {% elif mailing_unit.status == 'Created' %}
+        <h6>Status: <span class="badge text-bg-info">{{ mailing_unit.status }}</span></h6>
+        {% else %}
+        <h6>Status: <span class="badge text-bg-danger">{{ mailing_unit.status }}</span></h6>
+        {% endif %}
+        {% if perms.mailing.view_mailingunit %}
+        <h6>Created by: <a href="{% url 'users:user-profile' mailing_unit.owner.pk %}">{{mailing_unit.owner}}</a></h6>
+        {% endif %}
+        <a href="{% url 'mailing:mailing-unit-detail' mailing_unit.pk %}">
+            <button type="button" class="btn btn-lg btn-block btn-outline-info">Open</button>
+        </a>
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endblock %}

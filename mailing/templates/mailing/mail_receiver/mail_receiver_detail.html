@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ mail_receiver.email }}{% endblock %}
+
+{% block content %}
+
+<div class="card text-center">
+    <div class="card-header">
+        <h5>Full name: {{ mail_receiver.full_name }}</h5>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Email: {{ mail_receiver.email }}</h5>
+        <div class="card-footer">
+            <p class="text-secondary">Comment: {{ mail_receiver.comment }}</p>
+            {% if mail_receiver.owner.id == user.id %}
+            <a href="{% url 'mailing:mail-receiver-update' mail_receiver.pk %}">
+                <button type="button" class="btn btn-lg btn-block btn-outline-secondary">Edit</button>
+            </a>
+            <a href="{% url 'mailing:mail-receiver-delete' mail_receiver.pk %}">
+                <button type="button" class="btn btn-lg btn-block btn-outline-danger">Delete</button>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

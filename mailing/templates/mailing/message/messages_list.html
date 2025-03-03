@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %} All messages {% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% if all_messages|length == 0 %}
+    <h4>No messages created</h4>
+    {% endif %}
+    {% for message in all_messages %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><span class="badge text-bg-primary">Tite:</span> {{ message.title }}</h5>
+                <p class="card-text"><span class="badge text-bg-secondary">Body:</span> <small
+                        class="text-body-secondary">{{ message.body|truncatechars:100 }}</small></p>
+                <a href="{% url 'mailing:message-detail' message.pk %}" class="btn btn-primary">Open</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

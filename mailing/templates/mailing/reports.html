@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+
+{% block title %} Reports {% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Reports</h2>
+    <div class="list-group">
+        {% for user_attempt in user_attempts %}
+        <div class="list-group-item">
+            <h4><a href="{% url 'users:user-profile' user_attempt.user.pk %}"> {{ user_attempt.user.email }}</a></h4>
+            <p>Total messages sent: {{ user_attempt.total_attempts }}</p>
+            <p class="text-success">Successful attempts: {{ user_attempt.successful_attempts }}</p>
+            <p class="text-danger">Failed attempts: {{ user_attempt.failed_attempts }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

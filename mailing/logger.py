@@ -12,4 +12,3 @@ handler.setFormatter(formatter)
 mail_logger = logging.getLogger()
 mail_logger.setLevel(LOG_LEVEL)
 mail_logger.addHandler(handler)
-

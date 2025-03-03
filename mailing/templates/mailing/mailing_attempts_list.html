@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} All mailings attempts {% endblock %}
+
+{% block content %}
+
+{% if mailing_attempts|length == 0 %}
+<h4>No mailings were sent</h4>
+{% endif %}
+
+<ul class="list-group list-group-flush">
+    {% for attempt in mailing_attempts %}
+    <li class="list-group-item">
+        <h3>Topic: <a href="{% url 'mailing:message-detail' message.pk %}" class="link">{{ message.title }}</a></h3>
+        <h4>Date and time: <span class="badge text-bg-secondary">{{ attempt.attempt_at }}</span></h4>
+        {% if attempt.status == 'Success' %}
+        <h6>Status: <span class="badge text-bg-success">{{ attempt.status }}</span></h6>
+        {% else %}
+        <h6>Status: <span class="badge text-bg-danger">{{ attempt.status }}</span></h6>
+        {% endif %}
+
+        <h4>Server answer:</h4>
+        <p class="text-secondary">{{ attempt.server_answer }}</p>
+
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

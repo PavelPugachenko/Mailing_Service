@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Delete message{% endblock %}
+
+{% block content %}
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Delete message</h1>
+    <p>Are you sure you want to delete message: "{{ message.title }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'mailing:home' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

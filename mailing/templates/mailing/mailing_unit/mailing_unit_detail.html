@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Mailing: {{ mailing_unit.message }}{% endblock %}
+
+{% block content %}
+
+<div class="card text-center">
+    <div class="card-header">
+        <h5>Title: <a href="{% url 'mailing:message-detail' mailing_unit.message.pk %}">{{ mailing_unit.message }}</a>
+        </h5>
+        <h6>Owner: {{ mailing_unit.owner }}</h6>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Receivers:</h5>
+        <p class="card-text">
+        <div class="list-group">
+            {% for receiver in mailing_unit.receivers.all %}
+            <a href="{% url 'mailing:mail-receiver-detail' receiver.pk %}"
+               class="list-group-item list-group-item-action" aria-current="true">
+                {{ receiver }}
+            </a>
+            {% endfor %}
+        </div>
+        {% if mailing_unit.status == 'Launched' %}
+        <h6>Status: <span class="badge text-bg-success">{{ mailing_unit.status }}</span></h6>
+        {% elif mailing_unit.status == 'Created' %}
+        <h6>Status: <span class="badge text-bg-info">{{ mailing_unit.status }}</span></h6>
+        {% else %}
+        <h6>Status: <span class="badge text-bg-danger">{{ mailing_unit.status }}</span></h6>
+        {% endif %}
+        <a href="{% url 'mailing:mailing-attempts-list' mailing_unit.pk %}" class="card-link">Open history</a>
+    </div>
+    <div class="card-footer">
+        <div class="row">
+            <div class="col-6">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    {% if mailing_unit.owner == user %}
+                    <form action="{% url 'mailing:mailing-unit-send-mail' mailing_unit.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-primary">
+                            {% if mailing_unit.status != 'Launched' %}
+                            Start mailing
+                            {% else %}
+                            Send mailing again
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if mailing_unit.status == 'Launched' and mailing_unit.owner == user or perms.mailing.can_disable_mailing %}
+                    <form action="{% url 'mailing:mailing-unit-stop-mail' mailing_unit.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-lg btn-block btn-danger">End mailing</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-6">
+                {% if mailing_unit.owner == user %}
+                <a href="{% url 'mailing:mailing-unit-update' mailing_unit.pk %}">
+                    <button type="button" class="btn btn-md btn-block btn-outline-secondary">Edit</button>
+                </a>
+                <a href="{% url 'mailing:mailing-unit-delete' mailing_unit.pk %}">
+                    <button type="button" class="btn btn-md btn-block btn-outline-danger">Delete</button>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

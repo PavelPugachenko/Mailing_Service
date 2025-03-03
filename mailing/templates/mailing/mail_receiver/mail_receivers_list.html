@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %} All mail receivers {% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% if mail_receivers|length == 0 %}
+    <h4>No mail receivers created</h4>
+    {% endif %}
+    {% for mail_receiver in mail_receivers %}
+    {% if mail_receiver.owner == user or perms.mailing.view_mailreceiver%}
+    <div class="col">
+    <div class="card">
+    <div class="card-body">
+      <h5 class="card-title"><span class="badge text-bg-primary">Full name:</span> {{ mail_receiver.full_name }}</h5>
+      <p class="card-text"><span class="badge text-bg-info">Email: </span> {{ mail_receiver.email }}</p>
+      <p class="card-text"><span class="badge text-bg-secondary">Comment:</span> <small class="text-body-secondary">{{ mail_receiver.comment|truncatechars:100 }}</small></p>
+        <a href="{% url 'mailing:mail-receiver-detail' mail_receiver.pk %}" class="btn btn-primary">Open</a>
+        {% if perms.mailing.view_mailreceiver %}
+        <div class="card-footer">
+            Created by: <a href="{% url 'users:user-profile' mail_receiver.owner.pk %}">{{mail_receiver.owner}}</a>
+            </div>
+        {% endif %}
+    </div>
+      </div>
+        </div>
+    {% endif %}
+      {% endfor %}
+  </div>
+
+{% endblock %}
