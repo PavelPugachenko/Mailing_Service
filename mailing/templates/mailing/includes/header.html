@@ -52,14 +52,23 @@
                 </li>
                 {% endif %}
             </ul>
-            {% if user.is_authenticated %}
-
-            <form method="post" action="{% url 'users:logout' %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="p-2 btn btn-outline-danger">Logout</button>
-            </form>
-            {% endif %}
-
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <form method="post" action="{% url 'users:logout' %}" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link nav-link ">Выйти</button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>
+                </li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>

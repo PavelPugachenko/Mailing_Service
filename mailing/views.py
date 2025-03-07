@@ -60,18 +60,24 @@ class MailReceiverListView(LoginRequiredMixin, ListView):
         return MailReceiverService.get_owner_mail_receivers(self.request.user.id)
 
 
+
 @method_decorator(cache_page(CACHE_TIMEOUT), name="dispatch")
 class MailReceiverDetailView(LoginRequiredMixin, DetailView):
     model = MailReceiver
     template_name = "mailing/mail_receiver/mail_receiver_detail.html"
     context_object_name = "mail_receiver"
 
+    def get_object(self):
+        receiver = get_object_or_404(MailReceiver, pk=self.kwargs['pk'])
+        if not self.request.user.has_perm("mailing.view_mailreceiver") and receiver.owner != self.request.user:
+            raise Http404("У вас нет доступа к этому получателю")
+        return receiver
+
 
 class MailReceiverCreateView(LoginRequiredMixin, CreateView):
     model = MailReceiver
     form_class = MailReceiverForm
     template_name = "mailing/mail_receiver/mail_receiver_form.html"
-    context_object_name = "mail_receiver"
     success_url = reverse_lazy("mailing:mail-receivers-list")
 
     def form_valid(self, form):
@@ -83,8 +89,10 @@ class MailReceiverCreateView(LoginRequiredMixin, CreateView):
 class MailReceiverUpdateView(LoginRequiredMixin, UpdateView):
     model = MailReceiver
     form_class = MailReceiverForm
-    context_object_name = "mail_receiver"
     template_name = "mailing/mail_receiver/mail_receiver_form.html"
+
+    def get_object(self):
+        return get_object_or_404(MailReceiver, pk=self.kwargs['pk'], owner=self.request.user)
 
     def get_success_url(self):
         messages.success(
@@ -94,11 +102,19 @@ class MailReceiverUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy("mailing:mail-receivers-list")
 
 
+
 class MailReceiverDeleteView(LoginRequiredMixin, DeleteView):
     model = MailReceiver
-    context_object_name = "mail_receiver"
     template_name = "mailing/mail_receiver/mail_receiver_delete.html"
-    success_url = reverse_lazy("mailing:home")
+    success_url = reverse_lazy("mailing:mail-receivers-list")
+
+    def get_object(self):
+        return get_object_or_404(MailReceiver, pk=self.kwargs['pk'], owner=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        mail_logger.info(f"User {self.request.user} deleted mail receiver {self.get_object().pk}")
+        messages.success(self.request, "Mail receiver deleted successfully")
+        return super().delete(request, *args, **kwargs)
 
 
 class MessageListView(LoginRequiredMixin, ListView):
@@ -159,9 +175,14 @@ class MailingUnitListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         if self.request.user.has_perm("mailing.view_mailingunit"):
             mail_logger.info(f"Manager {self.request.user} is viewing all mailing units")
-            return MailingUnitService.get_all_mailing_units()
+            return MailingUnit.objects.all()
         mail_logger.info(f"User {self.request.user} is viewing their mailing units")
-        return MailingUnitService.get_owner_mailing_units(self.request.user.id)
+        return MailingUnit.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_view_all'] = self.request.user.has_perm("mailing.view_mailingunit")
+        return context
 
 
 @method_decorator(cache_page(CACHE_TIMEOUT), name="dispatch")
@@ -169,6 +190,22 @@ class MailingUnitDetailView(LoginRequiredMixin, DetailView):
     model = MailingUnit
     template_name = "mailing/mailing_unit/mailing_unit_detail.html"
     context_object_name = "mailing_unit"
+
+    def get_object(self):
+        # Получаем объект рассылки
+        mailing_unit = get_object_or_404(MailingUnit, pk=self.kwargs['pk'])
+
+        # Проверяем права доступа
+        if not self.request.user.has_perm("mailing.view_mailingunit") and \
+                mailing_unit.owner != self.request.user:
+            raise Http404("У вас нет доступа к этой рассылке")
+
+        return mailing_unit
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_view_all'] = self.request.user.has_perm("mailing.view_mailingunit")
+        return context
 
 
 class MailingUnitCreateView(LoginRequiredMixin, CreateView):
@@ -188,11 +225,18 @@ class MailingUnitUpdateView(LoginRequiredMixin, UpdateView):
     form_class = MailingUnitForm
     template_name = "mailing/mailing_unit/mailing_unit_form.html"
 
+    def get_object(self):
+        return get_object_or_404(MailingUnit, pk=self.kwargs['pk'], owner=self.request.user)
+
     def get_success_url(self):
         messages.success(
             self.request, f"Mailing updated successfully. Changes will be displayed after {CACHE_TIMEOUT} seconds"
         )
         return reverse_lazy("mailing:mailing-units-list")
+
+    def form_valid(self, form):
+        mail_logger.info(f"User {self.request.user} updated mailing unit {self.object.pk}")
+        return super().form_valid(form)
 
 
 class MailingUnitDeleteView(LoginRequiredMixin, DeleteView):
@@ -200,6 +244,14 @@ class MailingUnitDeleteView(LoginRequiredMixin, DeleteView):
     context_object_name = "mailing_unit"
     template_name = "mailing/mailing_unit/mailing_unit_delete.html"
     success_url = reverse_lazy("mailing:mailing-units-list")
+
+    def get_object(self):
+        return get_object_or_404(MailingUnit, pk=self.kwargs['pk'], owner=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        mail_logger.info(f"User {self.request.user} deleted mailing unit {self.get_object().pk}")
+        messages.success(self.request, "Mailing unit deleted successfully")
+        return super().delete(request, *args, **kwargs)
 
 
 class MailingUnitSendMailView(LoginRequiredMixin, View):
